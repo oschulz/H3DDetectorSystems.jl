@@ -5,6 +5,7 @@ __precompile__(true)
 module H3DPolaris
 
 include.([
+    "datastream.jl",
 ])
 
 end # module
