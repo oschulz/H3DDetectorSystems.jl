@@ -1,5 +1,6 @@
-using H3DPolaris
-using Base.Test
+# This file is a part of H3DPolaris.jl, licensed under the MIT License (MIT).
 
-# write your own tests here
-@test 1 == 2
+@Base.Test.testset "Package H3DPolaris" begin
+    include.([
+    ])
+end
