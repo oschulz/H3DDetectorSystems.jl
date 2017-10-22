@@ -2,6 +2,4 @@
 
 import Compat.Test
 Test.@testset "Package H3DPolaris" begin
-    include.([
-    ])
 end
