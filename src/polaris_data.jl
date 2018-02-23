@@ -3,24 +3,22 @@
 
 struct PolarisEvents
     evtno::Vector{Int32}    # Event number
-    ts_s::Vector{Int32}     # Event time, seconds
-    ts_ms::Vector{Int32}    # Event time, milliseconds
+    t::Vector{Int64}        # Event time, milliseconds
     nhits::Vector{Int32}    # Detector number
 end
 
 export PolarisEvents
 
 PolarisEvents() = PolarisEvents(
-    Vector{Int32}(), Vector{Int32}(), Vector{Int32}(),
-    Vector{Int32}()
+    Vector{Int32}(), Vector{Int32}(), Vector{Int32}()
 )
 
 
 
 struct PolarisHits
     evtno::Vector{Int32}    # Event number
-    ts_s::Vector{Int32}     # Event time, seconds
-    ts_ms::Vector{Int32}    # Event time, milliseconds
+    hitno::Vector{Int32}    # Hit number within the event
+    t::Vector{Int64}        # Event time, milliseconds
     detno::Vector{Int32}    # Detector number
     x::Vector{Int32}        # Position in µm,
     y::Vector{Int32}        # Position in µm,
@@ -35,7 +33,6 @@ PolarisHits() = PolarisHits(
     Vector{Int32}(), Vector{Int32}(), Vector{Int32}(),
     Vector{Int32}(), Vector{Int32}()
 )
-
 
 
 struct PolarisData
@@ -55,20 +52,22 @@ function Base.read!(input::IO, data::PolarisData)
 
     try
         evtno = if !isempty(data.events.evtno)
-            last(data.events.evtno) + 1
+            last(data.events.evtno)
         else
-            one(eltype(data.events.evtno))
+            zero(eltype(data.events.evtno))
         end
 
         while !eof(input)
             evthdr = read(input, PolarisEventHeader)
             evtno += 1
 
+            t = evthdr.ts_s * 10^3 + evthdr.ts_ms
+
             for i in 1:evthdr.nhits
                 hit = read(input, PolarisHit)
                 push!(hits.evtno, evtno)
-                push!(hits.ts_s, evthdr.ts_s)
-                push!(hits.ts_ms, evthdr.ts_ms)
+                push!(hits.hitno, i)
+                push!(hits.t, t)
                 push!(hits.detno, hit.detno)
                 push!(hits.x, hit.x)
                 push!(hits.y, hit.y)
@@ -77,8 +76,7 @@ function Base.read!(input::IO, data::PolarisData)
             end
 
             push!(events.evtno, evtno)
-            push!(events.ts_s, evthdr.ts_s)
-            push!(events.ts_ms, evthdr.ts_ms)
+            push!(events.t, t)
             push!(events.nhits, evthdr.nhits)
         end
     catch err
