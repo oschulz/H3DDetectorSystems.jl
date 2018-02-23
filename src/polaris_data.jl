@@ -57,6 +57,12 @@ function Base.read!(input::IO, data::PolarisData)
             zero(eltype(data.events.evtno))
         end
 
+        hitno = if !isempty(data.hits.hitno)
+            last(data.hits.hitno)
+        else
+            zero(eltype(data.hits.hitno))
+        end
+
         while !eof(input)
             evthdr = read(input, PolarisEventHeader)
             evtno += 1
@@ -65,8 +71,10 @@ function Base.read!(input::IO, data::PolarisData)
 
             for i in 1:evthdr.nhits
                 hit = read(input, PolarisHit)
+                hitno += 1
+
                 push!(hits.evtno, evtno)
-                push!(hits.hitno, i)
+                push!(hits.hitno, hitno)
                 push!(hits.t, t)
                 push!(hits.detno, hit.detno)
                 push!(hits.x, hit.x)
