@@ -3,6 +3,7 @@
 
 struct PolarisEvents
     evt_no::Vector{Int32}               # Event number
+    evt_nhits::Vector{Int32}            # Number of hits
     evt_t::Vector{Int64}                # Event time, nanoseconds
     evt_issync::Vector{Bool}            # True is sync event
     hit_detno::Vector{Vector{Int32}}    # Detector number
@@ -16,7 +17,7 @@ end
 export PolarisEvents
 
 PolarisEvents() = PolarisEvents(
-    Vector{Int32}(), Vector{Int64}(), Vector{Bool}(),
+    Vector{Int32}(), Vector{Int32}(), Vector{Int64}(), Vector{Bool}(),
     Vector{Vector{Int32}}(), Vector{Vector{Int32}}(), Vector{Vector{Int32}}(),
     Vector{Vector{Int32}}(), Vector{Vector{Int32}}(), Vector{Vector{Int64}}()
 )
@@ -133,6 +134,7 @@ function Base.read!(input::IO, data::PolarisData)
             end
 
             push!(events.evt_no, evtno)
+            push!(events.evt_nhits, nhits)
             push!(events.evt_t, t)
             push!(events.evt_issync, issync)
             push!(events.hit_detno, hit_detno)
