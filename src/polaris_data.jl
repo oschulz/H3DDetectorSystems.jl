@@ -2,16 +2,23 @@
 
 
 struct PolarisEvents
-    evtno::Vector{Int32}    # Event number
-    t::Vector{Int64}        # Event time, nanoseconds
-    nhits::Vector{Int32}    # Detector number
-    issync::Vector{Bool}    # True is sync event
+    evt_no::Vector{Int32}               # Event number
+    evt_t::Vector{Int64}                # Event time, nanoseconds
+    evt_issync::Vector{Bool}            # True is sync event
+    hit_detno::Vector{Vector{Int32}}    # Detector number
+    hit_x::Vector{Vector{Int32}}        # Position in µm,
+    hit_y::Vector{Vector{Int32}}        # Position in µm,
+    hit_z::Vector{Vector{Int32}}        # Position in µm,
+    hit_edep::Vector{Vector{Int32}}     # Energy deposition in eV
+    hit_t::Vector{Vector{Int64}}        # Hit time, nanoseconds
 end
 
 export PolarisEvents
 
 PolarisEvents() = PolarisEvents(
-    Vector{Int32}(), Vector{Int32}(), Vector{Int32}(), Vector{Bool}()
+    Vector{Int32}(), Vector{Int64}(), Vector{Bool}(),
+    Vector{Vector{Int32}}(), Vector{Vector{Int32}}(), Vector{Vector{Int32}}(),
+    Vector{Vector{Int32}}(), Vector{Vector{Int32}}(), Vector{Vector{Int64}}()
 )
 
 
@@ -54,10 +61,10 @@ function Base.read!(input::IO, data::PolarisData)
     time_in_s(timestamp::UInt64) = Int64(timestamp) * 10
 
     try
-        evtno = if !isempty(data.events.evtno)
-            last(data.events.evtno)
+        evtno = if !isempty(data.events.evt_no)
+            last(data.events.evt_no)
         else
-            zero(eltype(data.events.evtno))
+            zero(eltype(data.events.evt_no))
         end
 
         hitno = if !isempty(data.hits.hitno)
@@ -66,9 +73,23 @@ function Base.read!(input::IO, data::PolarisData)
             zero(eltype(data.hits.hitno))
         end
 
+        hit_detno = Vector{Int32}()
+        hit_x = Vector{Int32}()
+        hit_y = Vector{Int32}()
+        hit_z = Vector{Int32}()
+        hit_edep = Vector{Int32}()
+        hit_t = Vector{Int64}()
+
         while !eof(input)
             nhits_tmp = ntoh(read(input, UInt8))
             evtno += 1
+
+            resize!(hit_detno, 0)
+            resize!(hit_x, 0)
+            resize!(hit_y, 0)
+            resize!(hit_z, 0)
+            resize!(hit_edep, 0)
+            resize!(hit_t, 0)
 
             nhits = Int(0)
             t = Int64(-1)
@@ -93,6 +114,13 @@ function Base.read!(input::IO, data::PolarisData)
                     hit = read(input, PolarisHit)
                     hitno += 1
 
+                    push!(hit_detno, hit.detno)
+                    push!(hit_x, hit.x)
+                    push!(hit_y, hit.y)
+                    push!(hit_z, hit.z)
+                    push!(hit_edep, hit.edep)
+                    push!(hit_t, t)
+
                     push!(hits.evtno, evtno)
                     push!(hits.hitno, hitno)
                     push!(hits.t, t)
@@ -102,13 +130,17 @@ function Base.read!(input::IO, data::PolarisData)
                     push!(hits.z, hit.z)
                     push!(hits.edep, hit.edep)
                 end
-                info("TrigEvt at t = $(t * 1E-9)")
             end
 
-            push!(events.evtno, evtno)
-            push!(events.t, t)
-            push!(events.nhits, nhits)
-            push!(events.issync, issync)
+            push!(events.evt_no, evtno)
+            push!(events.evt_t, t)
+            push!(events.evt_issync, issync)
+            push!(events.hit_detno, hit_detno)
+            push!(events.hit_x, hit_x)
+            push!(events.hit_y, hit_y)
+            push!(events.hit_z, hit_z)
+            push!(events.hit_edep, hit_edep)
+            push!(events.hit_t, hit_t)
         end
     catch err
         if isa(err, EOFError)
