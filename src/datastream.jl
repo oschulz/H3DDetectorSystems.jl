@@ -1,22 +1,14 @@
 # This file is a part of H3DPolaris.jl, licensed under the MIT License (MIT).
 
 struct PolarisEventHeader
-    nhits::Int32    # Event multiplicity (number of interactions)
-    ts_s::Int32     # Event time, seconds
-    ts_ms::Int32    # Event time, milliseconds
+    timestamp::UInt64     # Event timestamp
 end
-
-export PolarisEventHeader
-
-Base.time(header::PolarisEventHeader) = header.ts_s + header.ts_ms * 1E-3
 
 
 function Base.read(src::IO, ::Type{PolarisEventHeader})
-    nhits = ntoh(read(src, UInt8))  # multiplicity, number of interactions
-    ts_s = ntoh(read(src, UInt32))
-    ts_ms = ntoh(read(src, UInt32))
+    timestamp = ntoh(read(src, UInt64))
 
-    PolarisEventHeader(nhits, ts_s, ts_ms)
+    PolarisEventHeader(timestamp)
 end
 
 
@@ -29,8 +21,6 @@ struct PolarisHit
     edep::Int32 # Energy deposition in eV
 end
 
-export PolarisHit
-
 
 function Base.read(src::IO, ::Type{PolarisHit})
     detno = ntoh(read(src, UInt8))
@@ -40,4 +30,27 @@ function Base.read(src::IO, ::Type{PolarisHit})
     edep = ntoh(read(src, Int32)) # eV
 
     PolarisHit(detno, x, y, z, edep)
+end
+
+
+
+struct PolarisSyncHeader
+    n::Int64
+end
+
+function Base.read(src::IO, ::Type{PolarisSyncHeader})
+    n = ntoh(read(src, UInt8))  # number of PolarisSyncValue entries to follow
+    PolarisSyncHeader(n)
+end
+
+
+
+struct PolarisSyncValue
+    x::UInt64
+end
+
+
+function Base.read(src::IO, ::Type{PolarisSyncValue})
+    x = ntoh(read(src, Int64))
+    PolarisSyncValue(x)
 end
