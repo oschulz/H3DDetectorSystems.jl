@@ -85,6 +85,8 @@ function Base.read!(input::IO, data::PolarisData)
             nhits_tmp = ntoh(read(input, UInt8))
             evtno += 1
 
+            evtno % 100000 == 0 && info("Reading event $evtno")
+
             resize!(hit_detno, 0)
             resize!(hit_x, 0)
             resize!(hit_y, 0)
@@ -137,12 +139,12 @@ function Base.read!(input::IO, data::PolarisData)
             push!(events.evt_nhits, nhits)
             push!(events.evt_t, t)
             push!(events.evt_issync, issync)
-            push!(events.hit_detno, hit_detno)
-            push!(events.hit_x, hit_x)
-            push!(events.hit_y, hit_y)
-            push!(events.hit_z, hit_z)
-            push!(events.hit_edep, hit_edep)
-            push!(events.hit_t, hit_t)
+            push!(events.hit_detno, deepcopy(hit_detno))
+            push!(events.hit_x, deepcopy(hit_x))
+            push!(events.hit_y, deepcopy(hit_y))
+            push!(events.hit_z, deepcopy(hit_z))
+            push!(events.hit_edep, deepcopy(hit_edep))
+            push!(events.hit_t, deepcopy(hit_t))
         end
     catch err
         if isa(err, EOFError)
