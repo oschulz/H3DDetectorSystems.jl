@@ -8,5 +8,6 @@ using CompressedStreams
 
 include("polaris_data.jl")
 include("datastream.jl")
+include("polaris_detector.jl")
 
 end # module
