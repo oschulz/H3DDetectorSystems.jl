@@ -83,7 +83,7 @@ function Base.read!(input::IO, data::PolarisData)
 
         while !eof(input)
             nhits_tmp = ntoh(read(input, UInt8))
-            evtno += 1
+            evtno += typeof(evtno)(1)
 
             evtno % 100000 == 0 && info("Reading event $evtno")
 
@@ -115,7 +115,7 @@ function Base.read!(input::IO, data::PolarisData)
                 t = time_in_s(evthdr.timestamp)
                 for i in 1:nhits
                     hit = read(input, PolarisHit)
-                    hitno += 1
+                    hitno += typeof(hitno)(1)
 
                     push!(hit_detno, hit.detno)
                     push!(hit_x, hit.x)
