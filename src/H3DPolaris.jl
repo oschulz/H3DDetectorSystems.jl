@@ -4,6 +4,7 @@ __precompile__(true)
 
 module H3DPolaris
 
+using BufferedStreams
 using CompressedStreams
 
 include("polaris_data.jl")

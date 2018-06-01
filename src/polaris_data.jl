@@ -162,6 +162,6 @@ Base.read(input::IO, ::Type{PolarisData}) = read!(input, PolarisData())
 
 function Base.read(filename::AbstractString, ::Type{PolarisData})
     open(CompressedFile(filename)) do input
-        read(input, PolarisData)
+        read(BufferedInputStream(input), PolarisData)
     end
 end
