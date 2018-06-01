@@ -6,20 +6,20 @@ struct PolarisEvents
     evt_nhits::Vector{Int32}            # Number of hits
     evt_t::Vector{Int64}                # Event time, nanoseconds
     evt_issync::Vector{Bool}            # True is sync event
-    hit_detno::Vector{Vector{Int32}}    # Detector number
-    hit_x::Vector{Vector{Int32}}        # Position in µm,
-    hit_y::Vector{Vector{Int32}}        # Position in µm,
-    hit_z::Vector{Vector{Int32}}        # Position in µm,
-    hit_edep::Vector{Vector{Int32}}     # Energy deposition in eV
-    hit_t::Vector{Vector{Int64}}        # Hit time, nanoseconds
+    hit_detno::VectorOfVectors{Int32}   # Detector number
+    hit_x::VectorOfVectors{Int32}       # Position in µm,
+    hit_y::VectorOfVectors{Int32}       # Position in µm,
+    hit_z::VectorOfVectors{Int32}       # Position in µm,
+    hit_edep::VectorOfVectors{Int32}    # Energy deposition in eV
+    hit_t::VectorOfVectors{Int64}        # Hit time, nanoseconds
 end
 
 export PolarisEvents
 
 PolarisEvents() = PolarisEvents(
     Vector{Int32}(), Vector{Int32}(), Vector{Int64}(), Vector{Bool}(),
-    Vector{Vector{Int32}}(), Vector{Vector{Int32}}(), Vector{Vector{Int32}}(),
-    Vector{Vector{Int32}}(), Vector{Vector{Int32}}(), Vector{Vector{Int64}}()
+    VectorOfVectors{Int32}(), VectorOfVectors{Int32}(), VectorOfVectors{Int32}(),
+    VectorOfVectors{Int32}(), VectorOfVectors{Int32}(), VectorOfVectors{Int64}()
 )
 
 
@@ -85,7 +85,7 @@ function Base.read!(input::IO, data::PolarisData)
             nhits_tmp = ntoh(read(input, UInt8))
             evtno += typeof(evtno)(1)
 
-            evtno % 100000 == 0 && info("Reading event $evtno")
+            # evtno % 100000 == 0 && info("Reading event $evtno")
 
             resize!(hit_detno, 0)
             resize!(hit_x, 0)
@@ -139,12 +139,12 @@ function Base.read!(input::IO, data::PolarisData)
             push!(events.evt_nhits, nhits)
             push!(events.evt_t, t)
             push!(events.evt_issync, issync)
-            push!(events.hit_detno, deepcopy(hit_detno))
-            push!(events.hit_x, deepcopy(hit_x))
-            push!(events.hit_y, deepcopy(hit_y))
-            push!(events.hit_z, deepcopy(hit_z))
-            push!(events.hit_edep, deepcopy(hit_edep))
-            push!(events.hit_t, deepcopy(hit_t))
+            push!(events.hit_detno, hit_detno)
+            push!(events.hit_x, hit_x)
+            push!(events.hit_y, hit_y)
+            push!(events.hit_z, hit_z)
+            push!(events.hit_edep, hit_edep)
+            push!(events.hit_t, hit_t)
         end
     catch err
         if isa(err, EOFError)
