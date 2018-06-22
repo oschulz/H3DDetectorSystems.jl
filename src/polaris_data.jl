@@ -54,18 +54,21 @@ export PolarisData
 PolarisData() = PolarisData(PolarisEvents(), PolarisHits())
 
 
-
-function Base.read!(input::IO, data::PolarisData)
+function Base.read!(
+    input::IO, data::PolarisData;
+    max_nevents::Int = typemax(Int),
+    max_time::Float64 = Inf
+)
     events = data.events
     hits = data.hits
 
     time_in_s(timestamp::UInt64) = Int64(timestamp) * 10
 
     try
-        evtno = if !isempty(data.events.evt_no)
-            last(data.events.evt_no)
+        evtno_offset = if !isempty(data.events.evt_no)
+            Int(last(data.events.evt_no))
         else
-            zero(eltype(data.events.evt_no))
+            zero(Int)
         end
 
         hitno = if !isempty(data.hits.hitno)
@@ -81,9 +84,13 @@ function Base.read!(input::IO, data::PolarisData)
         hit_edep = Vector{Int32}()
         hit_t = Vector{Int64}()
 
-        while !eof(input)
+        start_time = time_ns()
+        nevents::Int = 0
+
+        while !eof(input) && (nevents < max_nevents) && ((time_ns() - start_time) * 1E-9 < max_time)
+            nevents += 1
             nhits_tmp = ntoh(read(input, UInt8))
-            evtno += typeof(evtno)(1)
+            evtno = nevents + evtno_offset
 
             # evtno % 100000 == 0 && info("Reading event $evtno")
 
