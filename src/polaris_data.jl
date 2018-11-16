@@ -23,6 +23,22 @@ PolarisEvents() = PolarisEvents(
 )
 
 
+Base.NamedTuple(events::PolarisEvents) = (
+    evt_no = events.evt_no,
+    evt_t = events.evt_t,
+    evt_nhits = events.evt_nhits,
+    evt_issync = events.evt_issync,
+    hit_edep = events.hit_edep,
+    hit_t = events.hit_t,
+    hit_detno = events.hit_detno,
+    hit_x = events.hit_x,
+    hit_y = events.hit_y,
+    hit_z = events.hit_z,
+)
+
+
+Base.convert(::Type{NamedTuple}, events::PolarisEvents) = NamedTuple(events)
+
 
 function Base.read!(
     input::IO, events::PolarisEvents;
