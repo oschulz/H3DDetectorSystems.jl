@@ -24,57 +24,18 @@ PolarisEvents() = PolarisEvents(
 
 
 
-struct PolarisHits
-    evtno::Vector{Int32}    # Event number
-    hitno::Vector{Int32}    # Hit number within the event
-    t::Vector{Int64}        # Event time, nanoseconds
-    detno::Vector{Int32}    # Detector number
-    x::Vector{Int32}        # Position in µm,
-    y::Vector{Int32}        # Position in µm,
-    z::Vector{Int32}        # Position in µm,
-    edep::Vector{Int32}     # Energy deposition in eV
-end
-
-export PolarisHits
-
-PolarisHits() = PolarisHits(
-    Vector{Int32}(), Vector{Int32}(), Vector{Int32}(),
-    Vector{Int32}(), Vector{Int32}(), Vector{Int32}(),
-    Vector{Int32}(), Vector{Int32}()
-)
-
-
-struct PolarisData
-    events::PolarisEvents
-    hits::PolarisHits
-end
-
-export PolarisData
-
-PolarisData() = PolarisData(PolarisEvents(), PolarisHits())
-
-
 function Base.read!(
-    input::IO, data::PolarisData;
+    input::IO, events::PolarisEvents;
     max_nevents::Int = typemax(Int),
     max_time::Float64 = Inf
 )
-    events = data.events
-    hits = data.hits
-
     time_in_s(timestamp::UInt64) = Int64(timestamp) * 10
 
     try
-        evtno_offset = if !isempty(data.events.evt_no)
-            Int(last(data.events.evt_no))
+        evtno_offset = if !isempty(events.evt_no)
+            Int(last(events.evt_no))
         else
             zero(Int)
-        end
-
-        hitno = if !isempty(data.hits.hitno)
-            last(data.hits.hitno)
-        else
-            zero(eltype(data.hits.hitno))
         end
 
         hit_detno = Vector{Int32}()
@@ -122,7 +83,6 @@ function Base.read!(
                 t = time_in_s(evthdr.timestamp)
                 for i in 1:nhits
                     hit = read(input, PolarisHit)
-                    hitno += typeof(hitno)(1)
 
                     push!(hit_detno, hit.detno)
                     push!(hit_x, hit.x)
@@ -130,15 +90,6 @@ function Base.read!(
                     push!(hit_z, hit.z)
                     push!(hit_edep, hit.edep)
                     push!(hit_t, t)
-
-                    push!(hits.evtno, evtno)
-                    push!(hits.hitno, hitno)
-                    push!(hits.t, t)
-                    push!(hits.detno, hit.detno)
-                    push!(hits.x, hit.x)
-                    push!(hits.y, hit.y)
-                    push!(hits.z, hit.z)
-                    push!(hits.edep, hit.edep)
                 end
             end
 
@@ -160,15 +111,15 @@ function Base.read!(
             rethrow()
         end
     end
-    data
+    events
 end
 
 
-Base.read(input::IO, ::Type{PolarisData}) = read!(input, PolarisData())
+Base.read(input::IO, ::Type{PolarisEvents}) = read!(input, PolarisEvents())
 
 
-function Base.read(filename::AbstractString, ::Type{PolarisData})
+function Base.read(filename::AbstractString, ::Type{PolarisEvents})
     open(CompressedFile(filename)) do input
-        read(BufferedInputStream(input), PolarisData)
+        read(BufferedInputStream(input), PolarisEvents)
     end
 end
