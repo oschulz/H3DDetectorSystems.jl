@@ -4,6 +4,8 @@ __precompile__(true)
 
 module H3DPolaris
 
+using Sockets
+
 using ArraysOfArrays
 using BufferedStreams
 using CompressedStreams

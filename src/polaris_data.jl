@@ -108,14 +108,14 @@ function Base.read!(
             if nhits_tmp == 122
                 issync = true
                 synchdr = read(input, PolarisSyncHeader)
-                (synchdr.n < 2) && error("Invalid sync event in data stream, missing timestamp")
+                (synchdr.n < 2) && @error "Invalid sync event in data stream, missing timestamp"
                 for i in 1:synchdr.n
                     syncvalue = read(input, PolarisSyncValue)
                     if i == 2
                         t = time_in_s(syncvalue.x)
                     end
                 end
-                assert(t >= 0)
+                @assert t >= 0
             else
                 nhits = Int(nhits_tmp)
                 evthdr = read(input, PolarisEventHeader)

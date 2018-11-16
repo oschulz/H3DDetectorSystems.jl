@@ -37,10 +37,10 @@ end
 
 
 function exec_dev_cmd(device::PolarisDetectorInstance, cmd::AbstractString, expected_response::AbstractString)
-    info("Sending command \"$cmd\".")
+    @info "Sending command \"$cmd\"."
     println(device.control_io, cmd)
     resp = readline(device.control_io)
-    info("Received response \"$resp\".")
+    @info "Received response \"$resp\"."
     resp != expected_response && throw(ErrorException("Device command \"cmd\" resulted in invalid/unexpected response"))
     nothing
 end
