@@ -131,7 +131,7 @@ function Base.read!(
 end
 
 
-Base.read(input::IO, ::Type{PolarisEvents}) = read!(input, PolarisEvents())
+Base.read(input::IO, ::Type{PolarisEvents}; kwargs...) = read!(input, PolarisEvents(); kwargs...)
 
 
 function Base.read(filename::AbstractString, ::Type{PolarisEvents})
