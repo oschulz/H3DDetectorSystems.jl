@@ -11,7 +11,7 @@ struct PolarisEvents
     hit_y::VectorOfVectors{Int32}       # Position in µm,
     hit_z::VectorOfVectors{Int32}       # Position in µm,
     hit_edep::VectorOfVectors{Int32}    # Energy deposition in eV
-    hit_t::VectorOfVectors{Int64}        # Hit time, nanoseconds
+    hit_t::VectorOfVectors{Int64}       # Hit time, nanoseconds
 end
 
 export PolarisEvents
@@ -45,7 +45,7 @@ function Base.read!(
     max_nevents::Int = typemax(Int),
     max_time::Float64 = Inf
 )
-    time_in_s(timestamp::UInt64) = Int64(timestamp) * 10
+    time_in_ns(timestamp::UInt64) = Int64(timestamp >> 5) * 10
 
     try
         evtno_offset = if !isempty(events.evt_no)
@@ -78,47 +78,58 @@ function Base.read!(
             resize!(hit_edep, 0)
             resize!(hit_t, 0)
 
-            nhits = Int(0)
-            t = Int64(-1)
-            issync = false
+            nhits::Int = 0
+            t::Int64 = -1
+            issync::Bool = false
 
-            if nhits_tmp == 122
-                issync = true
-                synchdr = read(input, PolarisSyncHeader)
-                (synchdr.n < 2) && @error "Invalid sync event in data stream, missing timestamp"
-                for i in 1:synchdr.n
-                    syncvalue = read(input, PolarisSyncValue)
-                    if i == 2
-                        t = time_in_s(syncvalue.x)
+            if nhits_tmp == 0
+                # @debug "nhits_tmp == 0, skipping 23 bytes"
+                read(input, UInt64)
+                read(input, UInt64)
+                read(input, UInt32)
+                read(input, UInt16)
+                read(input, UInt8)
+            else
+                if nhits_tmp == 122
+                    issync = true
+                    synchdr = read(input, PolarisSyncHeader)
+                    (synchdr.n < 2) && @error "Invalid sync event in data stream, missing timestamp"
+                    for i in 1:synchdr.n
+                        syncvalue = read(input, PolarisSyncValue)
+                        if i == 2
+                            t = time_in_ns(syncvalue.x)
+                            # @debug "sync_t" t syncvalue.x
+                        end
+                    end
+                    @assert t >= 0
+                else
+                    nhits = Int(nhits_tmp)
+                    (1 <= nhits <= 121) || throw(ErrorException("Invalid number of hits ($nhits) in datastream"))     
+                    evthdr = read(input, PolarisEventHeader)
+                    t = time_in_ns(evthdr.timestamp)
+                    for i in 1:nhits
+                        hit = read(input, PolarisHit)
+
+                        push!(hit_detno, hit.detno)
+                        push!(hit_x, hit.x)
+                        push!(hit_y, hit.y)
+                        push!(hit_z, hit.z)
+                        push!(hit_edep, hit.edep)
+                        push!(hit_t, t)
                     end
                 end
-                @assert t >= 0
-            else
-                nhits = Int(nhits_tmp)
-                evthdr = read(input, PolarisEventHeader)
-                t = time_in_s(evthdr.timestamp)
-                for i in 1:nhits
-                    hit = read(input, PolarisHit)
 
-                    push!(hit_detno, hit.detno)
-                    push!(hit_x, hit.x)
-                    push!(hit_y, hit.y)
-                    push!(hit_z, hit.z)
-                    push!(hit_edep, hit.edep)
-                    push!(hit_t, t)
-                end
+                push!(events.evt_no, evtno)
+                push!(events.evt_nhits, nhits)
+                push!(events.evt_t, t)
+                push!(events.evt_issync, issync)
+                push!(events.hit_detno, hit_detno)
+                push!(events.hit_x, hit_x)
+                push!(events.hit_y, hit_y)
+                push!(events.hit_z, hit_z)
+                push!(events.hit_edep, hit_edep)
+                push!(events.hit_t, hit_t)
             end
-
-            push!(events.evt_no, evtno)
-            push!(events.evt_nhits, nhits)
-            push!(events.evt_t, t)
-            push!(events.evt_issync, issync)
-            push!(events.hit_detno, hit_detno)
-            push!(events.hit_x, hit_x)
-            push!(events.hit_y, hit_y)
-            push!(events.hit_z, hit_z)
-            push!(events.hit_edep, hit_edep)
-            push!(events.hit_t, hit_t)
         end
     catch err
         if isa(err, EOFError)
