@@ -1,8 +1,9 @@
-# Documentation: https://github.com/JuliaCI/Appveyor.jl
+## Documentation: https://github.com/JuliaCI/Appveyor.jl
 
 environment:
   matrix:
   - julia_version: 1.0
+  - julia_version: 1.2
   - julia_version: nightly
 
 platform:
@@ -13,7 +14,7 @@ platform:
 ## (tests will run but not make your overall status red)
 #matrix:
 #  allow_failures:
-#  - julia_version: nightly
+#    - julia_version: nightly
 
 #branches:
 #  only:

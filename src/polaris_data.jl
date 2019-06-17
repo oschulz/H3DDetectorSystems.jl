@@ -1,4 +1,4 @@
-# This file is a part of H3DPolaris.jl, licensed under the MIT License (MIT).
+# This file is a part of H3DDetectorSystems.jl, licensed under the MIT License (MIT).
 
 
 struct PolarisEvents
@@ -143,10 +143,3 @@ end
 
 
 Base.read(input::IO, ::Type{PolarisEvents}; kwargs...) = read!(input, PolarisEvents(); kwargs...)
-
-
-function Base.read(filename::AbstractString, ::Type{PolarisEvents})
-    open(CompressedFile(filename)) do input
-        read(BufferedInputStream(input), PolarisEvents)
-    end
-end

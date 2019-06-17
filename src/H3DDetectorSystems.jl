@@ -1,14 +1,13 @@
-# This file is a part of H3DPolaris.jl, licensed under the MIT License (MIT).
+# This file is a part of H3DDetectorSystems.jl, licensed under the MIT License (MIT).
 
 __precompile__(true)
 
-module H3DPolaris
+module H3DDetectorSystems
 
 using Sockets
 
 using ArraysOfArrays
 using BufferedStreams
-using CompressedStreams
 
 include("polaris_data.jl")
 include("datastream.jl")

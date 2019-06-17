@@ -1,4 +1,4 @@
-The H3DPolaris.jl package is licensed under the MIT "Expat" License:
+The H3DDetectorSystems.jl package is licensed under the MIT "Expat" License:
 
 > Copyright (c) 2017: Oliver Schulz <oschulz@mpp.mpg.de>
 > 

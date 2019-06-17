@@ -1,4 +1,4 @@
-# This file is a part of H3DPolaris.jl, licensed under the MIT License (MIT).
+# This file is a part of H3DDetectorSystems.jl, licensed under the MIT License (MIT).
 
 
 struct PolarisDetector

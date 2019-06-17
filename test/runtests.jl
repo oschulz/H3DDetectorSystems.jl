@@ -1,6 +1,8 @@
-# This file is a part of H3DPolaris.jl, licensed under the MIT License (MIT).
+# This file is a part of H3DDetectorSystems.jl, licensed under the MIT License (MIT).
 
 import Test
+Test.@testset "Package H3DDetectorSystems" begin
 
-Test.@testset "Package H3DPolaris" begin
-end
+# test code goes here
+
+end # testset

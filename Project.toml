@@ -1,0 +1,17 @@
+name = "H3DDetectorSystems"
+uuid = "9c95c776-90eb-11e9-3b18-358301686b1b"
+version = "0.1.0"
+
+[deps]
+ArraysOfArrays = "65a8f2f4-9b39-5baf-92e2-a9cc46fdf018"
+BufferedStreams = "e1450e63-4bb3-523b-b2a4-4ffa8c0fd77d"
+Sockets = "6462fe0b-24de-5631-8697-dd941f90decc"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
