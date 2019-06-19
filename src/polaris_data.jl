@@ -25,15 +25,15 @@ PolarisEvents() = PolarisEvents(
 
 Base.NamedTuple(events::PolarisEvents) = (
     evt_no = events.evt_no,
-    evt_t = events.evt_t,
+    evt_t = deepmap(x -> x * u"ns", events.evt_t),
     evt_nhits = events.evt_nhits,
     evt_issync = events.evt_issync,
-    hit_edep = events.hit_edep,
-    hit_t = events.hit_t,
+    hit_edep = deepmap(x -> x * u"eV", events.hit_edep),
+    hit_t = deepmap(x -> x * u"ns", events.hit_t),
     hit_detno = events.hit_detno,
-    hit_x = events.hit_x,
-    hit_y = events.hit_y,
-    hit_z = events.hit_z,
+    hit_x = deepmap(x -> x * u"μm", events.hit_x),
+    hit_y = deepmap(x -> x * u"μm", events.hit_y),
+    hit_z = deepmap(x -> x * u"μm", events.hit_z),
 )
 
 
